@@ -24,9 +24,12 @@
           - "Days left   : {{ date_diff }}"
 
     - name: Send Email if about to expire
-      community.general.mail:
-        to: rutolent@redhat.com
-        from: ansible@ansible.com
-        subject: Ansible-report - User {{ app_user }} expiry
-        body: ID {{ app_user }} is about to expire in {{ date_diff }}.
+      ansible.builtin.debug: 
+        msg: 
+          - "{{ app_user }} is to expire in {{ date_diff }} days"
+#      community.general.mail:
+#        to: rutolent@redhat.com
+#        from: ansible@ansible.com
+#        subject: Ansible-report - User {{ app_user }} expiry
+#        body: ID {{ app_user }} is about to expire in {{ date_diff }}.
       when: date_diff | int < warn_date | int
