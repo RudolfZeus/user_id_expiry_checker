@@ -1,6 +1,6 @@
 ---
 - name: facts playbook
-  hosts: web
+  hosts: node1
   become: true
   vars:
     app_user: "Roger"
