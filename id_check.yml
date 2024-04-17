@@ -1,0 +1,32 @@
+---
+- name: facts playbook
+  hosts: web
+  become: true
+  vars:
+    app_user: "Roger"
+    warn_date: 8
+
+  tasks:
+    - name: Collect user details
+      ansible.builtin.shell: >
+        date -d "`chage -l {{ app_user }} | grep "Password expires" | cut -f3- -d" "`" +%F
+      register: user_exp
+
+    - name: Check the days difference until expiry
+      ansible.builtin.set_fact:
+        date_diff: "{{ (((user_exp.stdout + ' 00:00:00') | to_datetime) - ((ansible_date_time.date + ' 00:00:00') | to_datetime)).days }}"
+
+    - name: Output Data
+      ansible.builtin.debug: 
+        msg: 
+          - "Date today  : {{ ansible_date_time.date }}"
+          - "Expiry date : {{ user_exp.stdout }}"
+          - "Days left   : {{ date_diff }}"
+
+    - name: Send Email if about to expire
+      community.general.mail:
+        to: rutolent@redhat.com
+        from: ansible@ansible.com
+        subject: Ansible-report - User {{ app_user }} expiry
+        body: ID {{ app_user }} is about to expire in {{ date_diff }}.
+      when: date_diff | int < warn_date | int
